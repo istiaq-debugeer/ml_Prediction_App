@@ -1,0 +1,79 @@
+{#<!DOCTYPE html>#}
+{#<html>#}
+{#<head>#}
+{#    <title>ML Project Result</title>#}
+{#    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">#}
+{#</head>#}
+{% extends 'home.html' %}
+{% block result %}
+<body class="g-sidenav-show  bg-gray-200">
+
+    <div class="row">
+        <div class="col-lg-3 col-md-3">
+            {% include 'sidebar.html' %}
+        </div>
+        <div class="col-lg-9 col-md-9">
+            {% include 'Header.html' %}
+
+
+
+            <figure class="figure">
+                            <h2 class="text-lg-center">Correlation Heatmap</h2>
+                            <div class="text-center">
+                              <img src="data:image/png;base64,{{ heatmap_data }}" alt="Correlation Heatmap" class="ifigure-img img-fluid rounded">
+                            </div>
+            </figure>
+             <figure class="figure">
+                    <h2 class=text-lg-center">Best Accuracy</h2>
+                    <div class="text-center">
+                      <img src="data:image/png;base64,{{ bar_plot_data }}" alt="Best Accuracy" class="ifigure-img img-fluid rounded">
+                    </div>
+              </figure>
+             <figure class="figure">
+                <h2 class="text-lg-center">Dot Plot Data</h2>
+                <div class="text-center">
+                  <img src="data:image/png;base64,{{ dot_plot_data }}" alt="DOt Plot" class="ifigure-img img-fluid rounded">
+                </div>
+              </figure>
+            <figure class="figure">
+                <h2 class="text-lg-center">HistoGram</h2>
+                <div class="text-center">
+                  <img src="data:image/png;base64,{{ histofram_plot_data }}" alt="DOt Plot" class="ifigure-img img-fluid rounded">
+                </div>
+              </figure>
+            <figure class="figure">
+                <h2 class="text-lg-center">Stacked Chart</h2>
+                <div class="text-center">
+                  <img src="data:image/png;base64,{{ stacked_bar_data }}" alt="DOt Plot" class="ifigure-img img-fluid rounded">
+                </div>
+              </figure>
+        </div>
+        <div class="col-lg-6 col-md-6">
+
+
+        </div>
+        <div class="col-lg-6 col-md-6">
+
+        </div>
+    </div>
+
+
+</body>
+{% endblock %}
+
+
+
+
+
+
+
+
+              <
+
+    </body>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+</html>

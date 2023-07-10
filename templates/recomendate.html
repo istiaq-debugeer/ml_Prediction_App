@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cellphone Recommendations</title>
+</head>
+<body class="g-sidenav-show  bg-gray-200">
+<div class="row">
+    <div class="col-lg-3 col-md-3">
+        {% include 'sidebar_Prediction.html' %}
+    </div>
+    <div class="col-lg-0 col-md-9">
+        {% include 'Header_prediction.html' %}
+        <h3 class="text-lg-center">Recommended Cellphones:</h3>
+{#        <p>{{ recommended_cellphones }}</p>#}
+             <h1 class="text-lg-center">Correlation Heatmap:</h1>
+        <img src="data:image/png;base64,{{ heatmap_image }}" alt="Correlation Heatmap">
+
+        <h1 class="text-lg-center">Individual Feature Plots:</h1>
+        {% for feature, image in feature_images %}
+            <h2>{{ feature.capitalize }} vs Rating:</h2>
+            <img src="data:image/png;base64,{{ image }}" alt="{{ feature.capitalize }} vs Rating"class="" >
+        {% endfor %}
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

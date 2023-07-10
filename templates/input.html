@@ -1,0 +1,92 @@
+{#<!DOCTYPE html>#}
+{#<html>#}
+{#<head>#}
+{#    <title>Cellphone Recommendations - Input</title>#}
+{#</head>#}
+{#<body>#}
+{#    <h1>Enter CSV File Paths:</h1>#}
+{#    <form method="POST" enctype="multipart/form-data" action="{% url 'recommend_cellphones' %}">#}
+{#      {% csrf_token %}#}
+{#      <input type="file" name="cellphonedata" accept=".csv"><br>#}
+{#      <input type="file" name="cellphonerating" accept=".csv"><br>#}
+{#      <input type="file" name="cellphoneUser" accept=".csv"><br>#}
+{#      <button type="submit">Submit</button>#}
+{#    </form>#}
+{##}
+{#</body>#}
+{#</html>#}
+{% extends 'home.html' %}
+
+{% block input %}
+    <div class="row">
+        <div class="col-lg-3 col-md-3">
+            {% include 'sidebar_Prediction.html' %}
+        </div>
+
+
+        <div class="col-lg-9 col-md-9">
+            <body class="offline-doc">
+          <!-- Navbar -->
+              <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="true">
+                <div class="container-fluid py-1 px-3">
+                  <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                      <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="javascript:;">Pages</a></li>
+                      <li class="breadcrumb-item text-sm  font-weight-bolde text-dark active" aria-current="page">Data Prediction</li>
+                    </ol>
+{#                      <a class="nav-link text-white " href='{% url 'dashboard' %}'><h6 class="font-weight-bolder mb-0">Dashboard</h6></a>#}
+                  </nav>
+                  <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+                    <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+                      <div class="input-group input-group-outline">
+                        <label class="form-label">Type here...</label>
+                        <input type="text" class="form-control">
+                      </div>
+                    </div>
+                    <ul class="navbar-nav  justify-content-end">
+
+                      <li class="nav-item d-flex align-items-center">
+                        <a href="../pages/sign-in.html" class="nav-link text-body font-weight-bold px-0">
+                          <i class="fa fa-user me-sm-1"></i>
+                          <span class="d-sm-inline d-none"></span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </nav>
+              <!-- End Navbar -->
+              <div class="page-header clear-filter">
+                <div class="page-header-image"></div>
+                <div class="text-center w-100">
+                  <div class="col-md-8 mx-auto my-11">
+                    <div class="brand">
+                      <h1 class="title pad-4">
+                          Upload Dataset
+                      </h1>
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'recommend_cellphones' %}">
+                              {% csrf_token %}
+                              <input type="file" name="cellphonedata" accept=".csv"><br>
+                              <input type="file" name="cellphonerating" accept=".csv"><br>
+                              <input type="file" name="cellphoneUser" accept=".csv"><br>
+                              <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+                              <button type="submit" class="btn btn-primary btn-lg">View Documentation</button>
+                        </form>
+
+                      <a href="" class="btn btn-primary btn-lg">View documentation</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </body>
+        </div>
+
+  <!--   Core JS Files   -->
+
+
+    </div>
+
+
+{% endblock %}
+
+
