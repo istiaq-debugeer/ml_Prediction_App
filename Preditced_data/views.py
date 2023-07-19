@@ -17,17 +17,57 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn import preprocessing
 import base64
 from io import BytesIO
-from django.http import HttpResponse
+
+from django.shortcuts import render,HttpResponse,redirect
+from django.contrib.auth.models import User
+from django.contrib.auth import  authenticate,login,logout
+from django.contrib.auth.decorators import login_required
 
 
+def SignupPage(request):
+    if request.method=='POST':
+        uname=request.POST.get("name")
+        email=request.POST.get("email")
+        pass1=request.POST.get("password1")
+        pass2=request.POST.get("password2")
+        if pass1!=pass2:
+            return HttpResponse("Your password and confirm password didnt match")
+        else:
+            my_user=User.objects.create_user(uname,email,pass1)
+            my_user.save()
+
+            return redirect('login')
+
+    return render(request,'sign-up.html')
+
+def LoginPage(request):
+    if request.method=='POST':
+        username=request.POST.get('username')
+        password=request.POST.get('pass')
+        #print(email,password)
+        user=authenticate(request,username=username,password=password)
+
+        if user is not None:
+            login(request,user)
+            return redirect('dashboard')
+        else:
+            return HttpResponse("username or password is incorect!!!")
+    return  render(request,'sign-in.html')
+
+def LogoutPage(request):
+    logout(request)
+    return redirect('login')
 
 def home(request):
     return render(request, 'home.html')
+@login_required(login_url='login')
 def document(request):
     return render(request, 'documentation.html')
+
+@login_required(login_url='login')
 def dashboard(request):
     return render(request, 'dashboard.html')
-
+@login_required(login_url='login')
 def ml_project_result(request):
     if request.method == 'POST':
         # Get the uploaded dataset file
@@ -188,7 +228,7 @@ def ml_project_result(request):
         return render(request, 'result.html', context)
 
     return render(request, 'result.html')
-
+@login_required(login_url='login')
 def input(request):
     return render(request,'input.html')
 
@@ -209,7 +249,7 @@ def preprocess_data(cellphone_data, cellphone_rating, cellphone_user):
     return cellphone_data, cellphone_rating, cellphone_user
 
 
-
+@login_required(login_url='login')
 def recommend_cellphones(request):
     if request.method == 'POST':
         cellphonedata_file = request.FILES['cellphonedata']
@@ -280,4 +320,8 @@ def plot_to_base64(plot):
     return image_base64
 
 
-
+@login_required(login_url='login')
+def index(request):
+    data = pd.read_csv('E:\DataPrediction\Preditced_data\dataset\StockData.csv')
+    context = {'data': data.to_html()}
+    return render(request, 'Details.html', context)
