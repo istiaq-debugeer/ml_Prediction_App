@@ -6,7 +6,6 @@ matplotlib.use('Agg')
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from django.conf import settings
 from django.shortcuts import render
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -15,9 +14,11 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn import preprocessing
-import base64
 from io import BytesIO
+import  base64
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
+from django.conf import settings
 from django.shortcuts import render,HttpResponse,redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import  authenticate,login,logout
@@ -232,21 +233,30 @@ def ml_project_result(request):
 def input(request):
     return render(request,'input.html')
 
+
+# Step 1: Data Preprocessing
 def preprocess_data(cellphone_data, cellphone_rating, cellphone_user):
     label_encoder = preprocessing.LabelEncoder()
+    encoded_values = {}
     for column in cellphone_data.columns:
         if cellphone_data[column].dtype == 'object':
             cellphone_data[column] = label_encoder.fit_transform(cellphone_data[column])
+            cellphone_data[column].fillna(cellphone_data[column].mode()[0], inplace=True)
+            encoded_values[column] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
 
     for column in cellphone_rating.columns:
         if cellphone_rating[column].dtype == 'object':
             cellphone_rating[column] = label_encoder.fit_transform(cellphone_rating[column])
+            cellphone_rating[column].fillna(cellphone_rating[column].mode()[0], inplace=True)
+            # encoded_values[column] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
 
     for column in cellphone_user.columns:
         if cellphone_user[column].dtype == 'object':
             cellphone_user[column] = label_encoder.fit_transform(cellphone_user[column])
+            cellphone_user[column].fillna(cellphone_user[column].mode()[0], inplace=True)
+            # encoded_values[column] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
 
-    return cellphone_data, cellphone_rating, cellphone_user
+    return cellphone_data, cellphone_rating, cellphone_user, encoded_values
 
 
 @login_required(login_url='login')
@@ -260,8 +270,9 @@ def recommend_cellphones(request):
         cellphone_rating = pd.read_csv(cellphonerating_file)
         cellphone_user = pd.read_csv(cellphoneUser_file)
 
-        cellphone_data, cellphone_rating, cellphone_user = preprocess_data(cellphone_data, cellphone_rating,
-                                                                           cellphone_user)
+        cellphone_data, cellphone_rating, cellphone_user, encoded_values = preprocess_data(cellphone_data,
+                                                                                           cellphone_rating,
+                                                                                           cellphone_user)
 
         merged_data = pd.merge(cellphone_rating, cellphone_data, on='cellphone_id')
         merged_data = pd.merge(merged_data, cellphone_user, on='user_id')
@@ -269,7 +280,7 @@ def recommend_cellphones(request):
         X_train, X_test, y_train, y_test = train_test_split(merged_data[['user_id', 'cellphone_id', 'rating']],
                                                             merged_data['rating'], test_size=0.2, random_state=42)
 
-        model = NearestNeighbors(n_neighbors=2, algorithm='auto')
+        model = NearestNeighbors(n_neighbors=5, algorithm='auto')
         model.fit(X_train[['user_id', 'rating']])
 
         new_user_id = 1001
@@ -295,8 +306,17 @@ def recommend_cellphones(request):
         for feature in features:
             plt.figure(figsize=(8, 6))
             sns.boxplot(x=feature, y='rating', data=merged_data)
-            image = plot_to_base64(plt)
-            feature_images.append((feature, image))
+            plt.title(f'{feature.capitalize()} vs Rating')
+
+            # Replace the encoded x-axis tick labels with the original names
+            plt.xticks(ticks=plt.xticks()[0],
+                       labels=[get_original_names(encoded_values, feature, int(tick)) for tick in plt.xticks()[0]])
+
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image_base64 = base64.b64encode(buffer.getvalue()).decode()
+            feature_images.append((feature, image_base64))
             plt.close()
 
         context = {
@@ -305,11 +325,16 @@ def recommend_cellphones(request):
             'feature_images': feature_images,
         }
 
-
-
         return render(request, 'recomendate.html', context)
 
     return render(request, 'input.html')
+
+
+def get_original_names(encoded_values, column_name, encoded_value):
+    if column_name in encoded_values:
+        encoded_to_original = encoded_values[column_name]
+        return next((name for name, value in encoded_to_original.items() if value == encoded_value), None)
+    return encoded_value
 
 
 def plot_to_base64(plot):
