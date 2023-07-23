@@ -304,7 +304,7 @@ def recommend_cellphones(request):
                     'selfie camera', 'battery size', 'screen size', 'weight', 'price']
         feature_images = []
         for feature in features:
-            plt.figure(figsize=(8, 6))
+            plt.figure(figsize=(10, 6))
             sns.boxplot(x=feature, y='rating', data=merged_data)
             plt.title(f'{feature.capitalize()} vs Rating')
 
