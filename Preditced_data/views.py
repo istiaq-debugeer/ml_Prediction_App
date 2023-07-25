@@ -15,60 +15,68 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn import preprocessing
 from io import BytesIO
-import  base64
+import base64
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from django.conf import settings
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import  authenticate,login,logout
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 
 
 def SignupPage(request):
-    if request.method=='POST':
-        uname=request.POST.get("name")
-        email=request.POST.get("email")
-        pass1=request.POST.get("password1")
-        pass2=request.POST.get("password2")
-        if pass1!=pass2:
+    if request.method == 'POST':
+        uname = request.POST.get("name")
+        email = request.POST.get("email")
+        pass1 = request.POST.get("password1")
+        pass2 = request.POST.get("password2")
+        if pass1 != pass2:
             return HttpResponse("Your password and confirm password didnt match")
         else:
-            my_user=User.objects.create_user(uname,email,pass1)
+            my_user = User.objects.create_user(uname, email, pass1)
             my_user.save()
 
             return redirect('login')
 
-    return render(request,'sign-up.html')
+    return render(request, 'sign-up.html')
+
 
 def LoginPage(request):
-    if request.method=='POST':
-        username=request.POST.get('username')
-        password=request.POST.get('pass')
-        #print(email,password)
-        user=authenticate(request,username=username,password=password)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('pass')
+        # print(email,password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request,user)
+            login(request, user)
             return redirect('dashboard')
         else:
             return HttpResponse("username or password is incorect!!!")
-    return  render(request,'sign-in.html')
+    return render(request, 'sign-in.html')
+
 
 def LogoutPage(request):
     logout(request)
     return redirect('login')
 
+
 def home(request):
     return render(request, 'home.html')
+
+
 @login_required(login_url='login')
 def document(request):
     return render(request, 'documentation.html')
 
+
 @login_required(login_url='login')
 def dashboard(request):
     return render(request, 'dashboard.html')
+
+
 @login_required(login_url='login')
 def ml_project_result(request):
     if request.method == 'POST':
@@ -157,7 +165,7 @@ def ml_project_result(request):
         plt.xticks(rotation=55)
         plt.savefig(dot_plot_path)
         plt.close()
-        #Histogram plot
+        # Histogram plot
         histogram_plot_path = os.path.join(settings.MEDIA_ROOT, 'histogram_plot.png')
         plt.figure(figsize=(10, 8))
         plt.hist(df[split_column], bins=10)  # Replace 'Column' with the actual column name from your dataset
@@ -166,7 +174,7 @@ def ml_project_result(request):
         plt.ylabel('Frequency')
         plt.savefig(histogram_plot_path)
         plt.close()
-        #pie chart
+        # pie chart
         # pie_chart_path = os.path.join(settings.MEDIA_ROOT, 'pie_chart.png')
         # plt.figure(figsize=(8, 8))
         # df[split_column].value_counts().plot(kind='pie', autopct='%1.1f%%')
@@ -174,7 +182,7 @@ def ml_project_result(request):
         # plt.ylabel('')
         # plt.savefig(pie_chart_path)
         # plt.close()
-        #violin chart
+        # violin chart
         # violin_plot_path = os.path.join(settings.MEDIA_ROOT, 'violin_plot.png')
         # plt.figure(figsize=(10, 8))
         # sns.violinplot(data=df)
@@ -184,7 +192,7 @@ def ml_project_result(request):
         # plt.xticks(rotation=45)
         # plt.savefig(violin_plot_path)
         # plt.close()
-        #stacked chart
+        # stacked chart
         stacked_bar_plot_path = os.path.join(settings.MEDIA_ROOT, 'stacked_bar_plot.png')
         plt.figure(figsize=(10, 8))
         colors = ['cyan', 'green', 'blue']  # Replace with your desired colors
@@ -224,15 +232,17 @@ def ml_project_result(request):
             'bar_plot_data': bar_plot_data,
             'dot_plot_data': dot_plot_data,
             'histofram_plot_data': histofram_plot_data,
-            'stacked_bar_data':stacked_bar_data
+            'stacked_bar_data': stacked_bar_data
         }
 
         return render(request, 'result.html', context)
 
     return render(request, 'result.html')
+
+
 @login_required(login_url='login')
 def input(request):
-    return render(request,'input.html')
+    return render(request, 'input.html')
 
 
 # Step 1: Data Preprocessing
@@ -249,13 +259,13 @@ def preprocess_data(cellphone_data, cellphone_rating, cellphone_user):
         if cellphone_rating[column].dtype == 'object':
             cellphone_rating[column] = label_encoder.fit_transform(cellphone_rating[column])
             cellphone_rating[column].fillna(cellphone_rating[column].mode()[0], inplace=True)
-            # encoded_values[column] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+            encoded_values[column] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
 
     for column in cellphone_user.columns:
         if cellphone_user[column].dtype == 'object':
             cellphone_user[column] = label_encoder.fit_transform(cellphone_user[column])
             cellphone_user[column].fillna(cellphone_user[column].mode()[0], inplace=True)
-            # encoded_values[column] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
+            encoded_values[column] = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
 
     return cellphone_data, cellphone_rating, cellphone_user, encoded_values
 
@@ -267,9 +277,7 @@ def recommend_cellphones(request):
         cellphonerating_file = request.FILES['cellphonerating']
         cellphoneUser_file = request.FILES['cellphoneUser']
 
-
         cellphone_data = pd.read_csv(cellphonedata_file)
-
 
         cellphone_rating = pd.read_csv(cellphonerating_file)
         cellphone_user = pd.read_csv(cellphoneUser_file)
@@ -284,8 +292,8 @@ def recommend_cellphones(request):
         X_train, X_test, y_train, y_test = train_test_split(merged_data[['user_id', 'cellphone_id', 'rating']],
                                                             merged_data['rating'], test_size=0.2, random_state=42)
 
-        print("Shape of X_train:", X_train.shape)
-        print("Shape of X_test:", X_test.shape)
+        # print("Shape of X_train:", X_train.shape)
+        # print("Shape of X_test:", X_test.shape)
 
         model = NearestNeighbors(n_neighbors=5, algorithm='auto')
         model.fit(X_train[['user_id', 'rating']])
@@ -295,27 +303,31 @@ def recommend_cellphones(request):
         distances, indices = model.kneighbors(new_user_ratings)
 
         similar_users = X_train.iloc[indices[0]]['user_id']
+
         recommended_cellphones = merged_data.loc[merged_data['user_id'].isin(similar_users), 'brand'].astype(
-            str).tolist()
-        recommended_cellphonesmodel = merged_data.loc[merged_data['user_id'].isin(similar_users), 'model'].astype(
-            str).tolist()
+             str).tolist()
+        cellphone_id_to_model = dict(zip(merged_data['cellphone_id'].astype(str), merged_data['model'].astype(str)))
+        recommended_cellphonesmodel = [cellphone_id_to_model[cellphone_id] for cellphone_id in recommended_cellphones]
 
-        print("Recommended Cellphones:", recommended_cellphones)
-        print("Recommended Cellphonesmodel:", recommended_cellphonesmodel)  # Add this line for debugging
 
-        if len(recommended_cellphones) == 0:
-            recommended_cellphones_str = "No recommendations available for the new user at the moment."
-        else:
-            brand_column_name = 'brand'
-            recommended_cellphone_names = [get_original_names(encoded_values, brand_column_name, int(cellphone_id)) for
-                                           cellphone_id in recommended_cellphones]
+        #print("Recommended Cellphonesmodel:", recommended_cellphonesmodel)  # Add this line for debugging
 
-            # Join the list of cellphone names with a comma separator
-            recommended_cellphones_str = ', '.join(recommended_cellphone_names)
+        # if len(recommended_cellphones) == 0:
+        #     recommended_cellphones_str = "No recommendations available for the new user at the moment."
+        # else:
+        #     brand_column_name = 'brand'
+        #     recommended_cellphone_names = [get_original_names(encoded_values, brand_column_name, int(cellphone_id)) for
+        #                                    cellphone_id in recommended_cellphones]
+        #
+        #     # Join the list of cellphone names with a comma separator
+        #     recommended_cellphones_str = ', '.join(recommended_cellphone_names)
 
         if len(recommended_cellphonesmodel) == 0:
             recommended_cellphonesmodel_str = "No recommendations available for the new user at the moment."
         else:
+
+            # Join the list of model names with a comma separator
+
             model_name_column_name = 'model'
             recommended_cellphone_model_names = [
                 get_original_names(encoded_values, model_name_column_name, int(cellphone_id)) for
@@ -324,21 +336,9 @@ def recommend_cellphones(request):
             # Join the list of model names with a comma separator
             recommended_cellphonesmodel_str = ', '.join(recommended_cellphone_model_names)
 
-
-            model_name_column_name = 'model'
-            recommended_cellphone_model_names = [
-                get_original_names(encoded_values, model_name_column_name, int(model_id)) for
-                model_id in recommended_cellphonesmodel]
-
-            # Join the list of model names with a comma separator
-            recommended_cellphonesmodel_str = ', '.join(recommended_cellphone_model_names)
-
         # Rest of your view function code
 
-
-
-
-    # Correlation Heatmap
+        # Correlation Heatmap
         correlation = merged_data.corr()
         plt.figure(figsize=(12, 10))
         sns.heatmap(correlation, annot=True)
@@ -366,8 +366,8 @@ def recommend_cellphones(request):
             plt.close()
 
         context = {
-            'recommended_cellphones': recommended_cellphones_str,
-            'recommended_cellphones_Model': recommended_cellphonesmodel_str,
+            'recommended_cellphones_Model': list(zip( recommended_cellphone_model_names)),
+            #'recommended_cellphones_Model': recommended_cellphonesmodel_str,
 
             'heatmap_image': heatmap_image,
             'feature_images': feature_images,
@@ -395,6 +395,7 @@ def plot_to_base64(plot):
 
 @login_required(login_url='login')
 def index(request):
-    data = pd.read_csv('E:\DataPrediction\Preditced_data\dataset\StockData.csv')
+    Document_file = request.FILES['Document']
+    data = pd.read_csv(Document_file)
     context = {'data': data.to_html()}
     return render(request, 'Details.html', context)

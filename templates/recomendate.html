@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cellphone Recommendations</title>
-</head>
+{% extends 'home.html' %}
+{% block content %}
+
+
 <body class="g-sidenav-show  bg-gray-200">
 <div class="row">
     <div class="col-lg-3 col-md-3">
@@ -21,33 +20,32 @@
             <img src="data:image/png;base64,{{ image }}" alt="{{ feature.capitalize }} vs Rating"class="" >
 
         {% endfor %}
+
+
+            {% if recommended_cellphones_Model %}
+            <h2>Recommended Cellphones:</h2>
+            <table>
+                <tr>
+                    <th>Cellphone</th>
+
+                </tr>
+                {% for cellphone in recommended_cellphones_Model %}
+                <tr>
+                    <td>{{ cellphone }}</td>
+
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>No recommendations available for the new user at the moment.</p>
+            {% endif %}
     </div>
-</div>
-<div class="col-lg-8 text-lg-center">
-    {% if recommended_cellphones %}
 
-    <<p>
-    <h2>Recommended Cellphones:</h2>
-      {{ recommended_cellphones }}
-    </p>
-{% else %}
-  <p>No recommendations available for the new user at the moment.</p>
-{% endif %}
-div class="col-lg-8 text-lg-center">
-    {% if recommended_cellphones_Model %}
-
-    <<p>
-    <h2>Recommended Cellphones:</h2>
-      {{ recommended_cellphones_Model }}
-    </p>
-{% else %}
-  <p>No recommendations available for the new user at the moment.</p>
-{% endif %}
-
-</div>
 
 
 
+</div>
 
 </body>
-</html>
+{% endblock %}
+
