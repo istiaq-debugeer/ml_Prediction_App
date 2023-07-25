@@ -23,6 +23,7 @@ from django.shortcuts import render,HttpResponse,redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import  authenticate,login,logout
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
 
 
 def SignupPage(request):
@@ -266,7 +267,10 @@ def recommend_cellphones(request):
         cellphonerating_file = request.FILES['cellphonerating']
         cellphoneUser_file = request.FILES['cellphoneUser']
 
+
         cellphone_data = pd.read_csv(cellphonedata_file)
+
+
         cellphone_rating = pd.read_csv(cellphonerating_file)
         cellphone_user = pd.read_csv(cellphoneUser_file)
 
@@ -280,6 +284,9 @@ def recommend_cellphones(request):
         X_train, X_test, y_train, y_test = train_test_split(merged_data[['user_id', 'cellphone_id', 'rating']],
                                                             merged_data['rating'], test_size=0.2, random_state=42)
 
+        print("Shape of X_train:", X_train.shape)
+        print("Shape of X_test:", X_test.shape)
+
         model = NearestNeighbors(n_neighbors=5, algorithm='auto')
         model.fit(X_train[['user_id', 'rating']])
 
@@ -288,11 +295,50 @@ def recommend_cellphones(request):
         distances, indices = model.kneighbors(new_user_ratings)
 
         similar_users = X_train.iloc[indices[0]]['user_id']
-        recommended_cellphones = merged_data[merged_data['user_id'].isin(similar_users)]['cellphone_id'].unique()
+        recommended_cellphones = merged_data.loc[merged_data['user_id'].isin(similar_users), 'brand'].astype(
+            str).tolist()
+        recommended_cellphonesmodel = merged_data.loc[merged_data['user_id'].isin(similar_users), 'model'].astype(
+            str).tolist()
 
-        recommended_cellphones_str = ', '.join(str(cellphone) for cellphone in recommended_cellphones)
+        print("Recommended Cellphones:", recommended_cellphones)
+        print("Recommended Cellphonesmodel:", recommended_cellphonesmodel)  # Add this line for debugging
 
-        # Correlation Heatmap
+        if len(recommended_cellphones) == 0:
+            recommended_cellphones_str = "No recommendations available for the new user at the moment."
+        else:
+            brand_column_name = 'brand'
+            recommended_cellphone_names = [get_original_names(encoded_values, brand_column_name, int(cellphone_id)) for
+                                           cellphone_id in recommended_cellphones]
+
+            # Join the list of cellphone names with a comma separator
+            recommended_cellphones_str = ', '.join(recommended_cellphone_names)
+
+        if len(recommended_cellphonesmodel) == 0:
+            recommended_cellphonesmodel_str = "No recommendations available for the new user at the moment."
+        else:
+            model_name_column_name = 'model'
+            recommended_cellphone_model_names = [
+                get_original_names(encoded_values, model_name_column_name, int(cellphone_id)) for
+                cellphone_id in recommended_cellphonesmodel]
+
+            # Join the list of model names with a comma separator
+            recommended_cellphonesmodel_str = ', '.join(recommended_cellphone_model_names)
+
+
+            model_name_column_name = 'model'
+            recommended_cellphone_model_names = [
+                get_original_names(encoded_values, model_name_column_name, int(model_id)) for
+                model_id in recommended_cellphonesmodel]
+
+            # Join the list of model names with a comma separator
+            recommended_cellphonesmodel_str = ', '.join(recommended_cellphone_model_names)
+
+        # Rest of your view function code
+
+
+
+
+    # Correlation Heatmap
         correlation = merged_data.corr()
         plt.figure(figsize=(12, 10))
         sns.heatmap(correlation, annot=True)
@@ -321,6 +367,8 @@ def recommend_cellphones(request):
 
         context = {
             'recommended_cellphones': recommended_cellphones_str,
+            'recommended_cellphones_Model': recommended_cellphonesmodel_str,
+
             'heatmap_image': heatmap_image,
             'feature_images': feature_images,
         }

@@ -23,6 +23,28 @@
         {% endfor %}
     </div>
 </div>
+<div class="col-lg-8 text-lg-center">
+    {% if recommended_cellphones %}
+
+    <<p>
+    <h2>Recommended Cellphones:</h2>
+      {{ recommended_cellphones }}
+    </p>
+{% else %}
+  <p>No recommendations available for the new user at the moment.</p>
+{% endif %}
+div class="col-lg-8 text-lg-center">
+    {% if recommended_cellphones_Model %}
+
+    <<p>
+    <h2>Recommended Cellphones:</h2>
+      {{ recommended_cellphones_Model }}
+    </p>
+{% else %}
+  <p>No recommendations available for the new user at the moment.</p>
+{% endif %}
+
+</div>
 
 
 
